@@ -3,13 +3,15 @@ import requests
 import pandas as pd
 from io import BytesIO
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.utils import today
 
 group_name = "ИСиП-21"
 
 def download_and_generate_schedule():
     today = datetime.now()
-    day_month = int(today.strftime("%d%m"))
+    yesterday = today - timedelta(days=1)
+    day_month = int(yesterday.strftime("%d%m"))
 
     url = f"https://altask.ru/images/raspisanie/DO/{day_month}.xls"
     response = requests.get(url)
@@ -60,9 +62,9 @@ def download_and_generate_schedule():
         cell.set_height(0.3)
         cell.set_width(0.6)
 
-    # Определяем путь к файлу
     output_path = os.path.abspath("schedule.png")
     plt.savefig(output_path, dpi=300, bbox_inches="tight")
-    plt.close(fig)  # Закрываем фигуру, чтобы освободить память
+    plt.close(fig)
 
     return output_path
+
