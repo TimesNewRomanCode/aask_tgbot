@@ -4,7 +4,7 @@ import pandas as pd
 from io import BytesIO
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-from dateutil.utils import today
+
 
 group_name = "ИСиП-21"
 
