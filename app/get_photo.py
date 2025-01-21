@@ -34,7 +34,7 @@ async def scheduled_task():
     """Задача отправки расписания в определённое время."""
     print("Запуск задачи...")
 
-    target_time = time(15, 26)
+    target_time = time(18, 30)
     now = datetime.now()
     next_run = datetime.combine(now.date(), target_time)
 

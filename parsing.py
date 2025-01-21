@@ -8,9 +8,9 @@ from datetime import datetime, timedelta
 
 def download_and_generate_schedule(group_name):
     today = datetime.now()
-    day_of_week = today.weekday()  # 0 = Понедельник, 6 = Воскресенье
-    day_of_week = 4
-    # Если выходной день (суббота или воскресенье), переключаем на понедельник
+    day_of_week = today.weekday()
+
+
     if day_of_week == 5:  # Суббота
         target_day = today + timedelta(days=2)
     elif day_of_week == 6:  # Воскресенье
@@ -20,7 +20,7 @@ def download_and_generate_schedule(group_name):
 
     day_month = int(target_day.strftime("%d%m"))
 
-    url = f"https://altask.ru/images/raspisanie/DO/{2001}.xls"
+    url = f"https://altask.ru/images/raspisanie/DO/{day_month}.xls"
     response = requests.get(url)
     file_content = response.content
     file = BytesIO(file_content)
