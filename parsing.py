@@ -6,14 +6,21 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 
-group_name = "ИСиП-21"
-
-def download_and_generate_schedule():
+def download_and_generate_schedule(group_name):
     today = datetime.now()
-    yesterday = today - timedelta(days=1)
-    day_month = int(yesterday.strftime("%d%m"))
+    day_of_week = today.weekday()  # 0 = Понедельник, 6 = Воскресенье
+    day_of_week = 4
+    # Если выходной день (суббота или воскресенье), переключаем на понедельник
+    if day_of_week == 5:  # Суббота
+        target_day = today + timedelta(days=2)
+    elif day_of_week == 6:  # Воскресенье
+        target_day = today + timedelta(days=1)
+    else:
+        target_day = today
 
-    url = f"https://altask.ru/images/raspisanie/DO/{day_month}.xls"
+    day_month = int(target_day.strftime("%d%m"))
+
+    url = f"https://altask.ru/images/raspisanie/DO/{2001}.xls"
     response = requests.get(url)
     file_content = response.content
     file = BytesIO(file_content)
@@ -44,14 +51,34 @@ def download_and_generate_schedule():
             break
 
     schedule = [val if pd.notna(val) else "" for val in values]
-    merged_schedule = [schedule[0]]
 
-    for i in range(1, len(schedule) - 1, 2):
-        merged_schedule.append(f"{schedule[i]}\n{schedule[i + 1]}" if schedule[i] and schedule[i + 1] else schedule[i])
+    if day_of_week == 6:
+        merged_schedule = [schedule[0]]
+        merged_schedule.append(schedule[1])
+        merged_schedule.append(f"{schedule[2]}\n{schedule[3]}")
+        merged_schedule.append(f"{schedule[4]}\n{schedule[5]}")
+        merged_schedule.append(schedule[6])
+        merged_schedule.append(f"{schedule[7]}\n{schedule[8]}")
+        merged_schedule.append(f"{schedule[9]}\n{schedule[10]}")
+        merged_schedule.append(f"{schedule[11]}\n{schedule[12]}")
+    elif day_of_week == 4 or 5:
+        merged_schedule = [schedule[0]]
+        merged_schedule.append(f"{schedule[1]}\n{schedule[2]}")
+        merged_schedule.append(f"{schedule[3]}\n{schedule[4]}")
+        merged_schedule.append("ВЫХОДНОЙ")
+        merged_schedule.append(f"{schedule[5]}\n{schedule[6]}")
+        merged_schedule.append(f"{schedule[7]}\n{schedule[8]}")
 
-    df_schedule = pd.DataFrame(merged_schedule, columns=["Smerged_schedule"])
+    else:
+        merged_schedule = [schedule[0]]
+        for i in range(1, len(schedule) - 1, 2):
+            merged_schedule.append(
+                f"{schedule[i]}\n{schedule[i + 1]}" if schedule[i] and schedule[i + 1] else schedule[i])
 
-    fig, ax = plt.subplots(figsize=(6, len(merged_schedule) * 0.3))
+    # Создаем таблицу
+    df_schedule = pd.DataFrame(merged_schedule, columns=["Расписание"])
+
+    fig, ax = plt.subplots(figsize=(7, len(merged_schedule) * 0.3))
     ax.axis('tight')
     ax.axis('off')
     table = ax.table(cellText=df_schedule.values, colLabels=df_schedule.columns, cellLoc='center', loc='center')
@@ -67,4 +94,3 @@ def download_and_generate_schedule():
     plt.close(fig)
 
     return output_path
-
